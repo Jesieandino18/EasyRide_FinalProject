@@ -24,3 +24,21 @@ export const insert = async (driver) => {
 
   return result.insertId;
 };
+
+export const findDriverForLogin = async (username) => {
+  const [rows] = await pool.execute(
+    "SELECT id, full_name, address, contact_number, plate_number, username, password FROM drivers WHERE username = ? LIMIT 1",
+    [username]
+  );
+
+  return rows[0] || null;
+};
+
+export const findDriverById = async (id) => {
+  const [rows] = await pool.execute(
+    "SELECT id, full_name, address, contact_number, plate_number, username FROM drivers WHERE id = ? LIMIT 1",
+    [id]
+  );
+
+  return rows[0] || null;
+};

@@ -1743,3 +1743,32 @@ button.modal-role:hover {
 .driver-auth-page .auth-header p {
   color: #3c536b;
 }
+.driver-profile-details {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid #dce5ef;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.driver-profile-details dt {
+  margin-top: 16px;
+  color: #455e75;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.driver-profile-details dt:first-child {
+  margin-top: 0;
+}
+
+.driver-profile-details dd {
+  margin: 6px 0 0;
+  color: #092849;
+  overflow-wrap: anywhere;
+}
+
+.driver-auth-page .driver-register-link {
+  display: block;
+  margin: 20px auto 0;
+}
