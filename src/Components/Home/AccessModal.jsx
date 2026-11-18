@@ -1,14 +1,13 @@
-﻿
-const AccessModal = ({
+﻿const AccessModal = ({
   accessOpen,
   setAccessOpen,
-
+  openDispatcher,
 }) => {
-  if (!accessOpen) return null;
-
   const closeModal = () => {
     setAccessOpen(false);
   };
+
+  if (!accessOpen) return null;
 
   return (
     <div
@@ -68,9 +67,13 @@ const AccessModal = ({
                 and travel information.
               </p>
 
-              <span className="card-link disabled-card-link">
+              <button
+                type="button"
+                className="card-link"
+                disabled
+              >
                 Continue as Passenger →
-              </span>
+              </button>
             </div>
           </article>
 
@@ -107,7 +110,7 @@ const AccessModal = ({
           </article>
 
           {/* DISPATCHER */}
-          <article className="access-card disabled-access-card">
+          <article className="access-card">
             <img
               className="access-card-image"
               src="/images/dispatcher.png"
@@ -124,19 +127,23 @@ const AccessModal = ({
               <h3>Dispatcher</h3>
 
               <p>
-                Manage vehicle information and
-                terminal operations.
+                Access the dispatcher login interface.
               </p>
 
-              <span className="card-link disabled-card-link">
+              <button
+                type="button"
+                className="card-link"
+                onClick={openDispatcher}
+              >
                 Continue as Dispatcher →
-              </span>
+              </button>
             </div>
           </article>
         </div>
 
         <p className="modal-note">
-          Role access will be available in a future update.
+          Dispatcher login preview is available.
+          Authentication is pending implementation.
         </p>
       </div>
     </div>
@@ -144,4 +151,3 @@ const AccessModal = ({
 };
 
 export default AccessModal;
-

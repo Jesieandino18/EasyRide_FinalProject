@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./style.css";
+import Jessie_DispatcherAuth from "./Components/Dispatcher/Jessie_DispatcherAuth";
 
 import Navbar from "./Components/Home/Navbar";
 import Hero from "./Components/Home/Hero";
@@ -13,10 +14,12 @@ import Footer from "./Components/Home/Footer";
 import AccessModal from "./Components/Home/AccessModal";
 
 const App = () => {
+  const [dispatcherOpen, setDispatcherOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
 
   const goHome = () => {
+    setDispatcherOpen(false);
     setMenuOpen(false);
     setAccessOpen(false);
 
@@ -26,7 +29,15 @@ const App = () => {
     });
   };
 
+  const openDispatcher = () => {
+    setDispatcherOpen(true);
+    setMenuOpen(false);
+    setAccessOpen(false);
+    window.scrollTo(0, 0);
+  };
+
   const goToSection = (section) => {
+    setDispatcherOpen(false);
     setMenuOpen(false);
     setAccessOpen(false);
 
@@ -50,6 +61,10 @@ const App = () => {
     }, 100);
   };
 
+  if (dispatcherOpen) {
+    return <Jessie_DispatcherAuth onBack={goHome} />;
+  }
+
   return (
     <div className="easyride-app">
       <Navbar
@@ -62,6 +77,7 @@ const App = () => {
       <AccessModal
         accessOpen={accessOpen}
         setAccessOpen={setAccessOpen}
+        openDispatcher={openDispatcher}
       />
 
       <Hero setAccessOpen={setAccessOpen} />
