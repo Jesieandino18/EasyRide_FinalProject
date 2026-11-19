@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Mark_DriverAuth from "./Mark_DriverAuth";
+import Mark_DriverLocation from "./Mark_DriverLocation";
 
 const readResponse = async (response) => {
   const result = await response.json().catch(() => null);
@@ -152,8 +153,8 @@ const Mark_DriverPortal = ({ onBack }) => {
 
   if (driver) {
     return (
-      <main className="driver-auth-page">
-        <section className="driver-auth-card">
+      <main className="driver-auth-page driver-dashboard-page">
+        <section className="driver-auth-card driver-dashboard-card">
           <header className="auth-header">
             <h1>EASYRIDE</h1>
             <p>Driver Dashboard</p>
@@ -174,6 +175,8 @@ const Mark_DriverPortal = ({ onBack }) => {
             <dt>Contact Number</dt>
             <dd>{driver.contact_number}</dd>
           </dl>
+
+          <Mark_DriverLocation />
 
           {error && (
             <p className="auth-error" role="alert">
@@ -235,7 +238,9 @@ const Mark_DriverPortal = ({ onBack }) => {
               id="driver-login-username"
               type="text"
               value={username}
-              onChange={(event) => setUsername(event.target.value)}
+              onChange={(event) =>
+                setUsername(event.target.value)
+              }
               autoComplete="username"
               maxLength={100}
               disabled={loading}
@@ -252,7 +257,9 @@ const Mark_DriverPortal = ({ onBack }) => {
               id="driver-login-password"
               type="password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) =>
+                setPassword(event.target.value)
+              }
               autoComplete="current-password"
               disabled={loading}
               required
