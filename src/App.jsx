@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./style.css";
 
 import Navbar from "./Components/Home/Navbar";
@@ -11,14 +11,21 @@ import PassengerPreview from "./Components/Home/PassengerPreview";
 import Contact from "./Components/Home/Contact";
 import Footer from "./Components/Home/Footer";
 import AccessModal from "./Components/Home/AccessModal";
-import Mark_DriverAuth from "./Components/Driver/Mark_DriverAuth";
+import Mark_DriverPortal from "./Components/Driver/Mark_DriverPortal";
+
+const getCurrentPage = () => {
+  return window.location.hash === "#driver"
+    ? "driverRegistration"
+    : "home";
+};
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState("home");
+  const [currentPage, setCurrentPage] = useState(getCurrentPage);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
 
   const goHome = () => {
+    window.location.hash = "home";
     setCurrentPage("home");
     setMenuOpen(false);
     setAccessOpen(false);
@@ -30,6 +37,7 @@ const App = () => {
   };
 
   const openDriver = () => {
+    window.location.hash = "driver";
     setCurrentPage("driverRegistration");
     setMenuOpen(false);
     setAccessOpen(false);
@@ -40,6 +48,7 @@ const App = () => {
     setCurrentPage("home");
     setMenuOpen(false);
     setAccessOpen(false);
+    window.location.hash = section;
 
     setTimeout(() => {
       const target = document.getElementById(section);
@@ -61,8 +70,25 @@ const App = () => {
     }, 100);
   };
 
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentPage(getCurrentPage());
+      setMenuOpen(false);
+      setAccessOpen(false);
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener(
+        "hashchange",
+        handleHashChange
+      );
+    };
+  }, []);
+
   if (currentPage === "driverRegistration") {
-    return <Mark_DriverAuth onBack={goHome} />;
+    return <Mark_DriverPortal onBack={goHome} />;
   }
 
   return (

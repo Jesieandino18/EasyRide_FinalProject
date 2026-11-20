@@ -83,3 +83,66 @@ export const createDriver = async (body) => {
     throw error;
   }
 };
+
+export const loginDriver = async (body) => {
+  const { username, password } = body || {};
+
+  if (
+    typeof username !== "string" ||
+    typeof password !== "string" ||
+    !username.trim() ||
+    !password
+  ) {
+    throw new ValidationError(
+      400,
+      "Username and password are required."
+    );
+  }
+
+  if (
+    username.trim().length > 100 ||
+    password.length > 64 ||
+    Buffer.byteLength(password, "utf8") > 72
+  ) {
+    throw new ValidationError(
+      401,
+      "Invalid username or password."
+    );
+  }
+
+  const driver = await driverModel.findDriverForLogin(
+    username.trim().toLowerCase()
+  );
+
+  if (
+    !driver ||
+    !(await bcrypt.compare(password, driver.password))
+  ) {
+    throw new ValidationError(
+      401,
+      "Invalid username or password."
+    );
+  }
+
+  return {
+    id: driver.id,
+    full_name: driver.full_name,
+    address: driver.address,
+    contact_number: driver.contact_number,
+    plate_number: driver.plate_number,
+    username: driver.username,
+  };
+};
+
+export const getCurrentDriver = async (id) => {
+  const driver = await driverModel.findDriverById(id);
+
+  if (!driver) {
+    throw new ValidationError(
+      401,
+      "Driver account not found. Please log in again."
+    );
+  }
+
+  return driver;
+};
