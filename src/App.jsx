@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./style.css";
+
 import Jessie_DispatcherAuth from "./Components/Dispatcher/Jessie_DispatcherAuth";
+import Mark_DriverPortal from "./Components/Driver/Mark_DriverPortal";
 
 import Navbar from "./Components/Home/Navbar";
 import Hero from "./Components/Home/Hero";
@@ -13,13 +15,26 @@ import Contact from "./Components/Home/Contact";
 import Footer from "./Components/Home/Footer";
 import AccessModal from "./Components/Home/AccessModal";
 
+const getCurrentPage = () => {
+  if (window.location.hash === "#driver") {
+    return "driver";
+  }
+
+  if (window.location.hash === "#dispatcher") {
+    return "dispatcher";
+  }
+
+  return "home";
+};
+
 const App = () => {
-  const [dispatcherOpen, setDispatcherOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(getCurrentPage);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
 
   const goHome = () => {
-    setDispatcherOpen(false);
+    window.location.hash = "home";
+    setCurrentPage("home");
     setMenuOpen(false);
     setAccessOpen(false);
 
@@ -29,17 +44,27 @@ const App = () => {
     });
   };
 
+  const openDriver = () => {
+    window.location.hash = "driver";
+    setCurrentPage("driver");
+    setMenuOpen(false);
+    setAccessOpen(false);
+    window.scrollTo(0, 0);
+  };
+
   const openDispatcher = () => {
-    setDispatcherOpen(true);
+    window.location.hash = "dispatcher";
+    setCurrentPage("dispatcher");
     setMenuOpen(false);
     setAccessOpen(false);
     window.scrollTo(0, 0);
   };
 
   const goToSection = (section) => {
-    setDispatcherOpen(false);
+    setCurrentPage("home");
     setMenuOpen(false);
     setAccessOpen(false);
+    window.location.hash = section;
 
     setTimeout(() => {
       const target = document.getElementById(section);
@@ -61,7 +86,28 @@ const App = () => {
     }, 100);
   };
 
-  if (dispatcherOpen) {
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentPage(getCurrentPage());
+      setMenuOpen(false);
+      setAccessOpen(false);
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener(
+        "hashchange",
+        handleHashChange
+      );
+    };
+  }, []);
+
+  if (currentPage === "driver") {
+    return <Mark_DriverPortal onBack={goHome} />;
+  }
+
+  if (currentPage === "dispatcher") {
     return <Jessie_DispatcherAuth onBack={goHome} />;
   }
 
@@ -77,6 +123,7 @@ const App = () => {
       <AccessModal
         accessOpen={accessOpen}
         setAccessOpen={setAccessOpen}
+        openDriver={openDriver}
         openDispatcher={openDispatcher}
       />
 

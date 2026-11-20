@@ -1508,3 +1508,267 @@ button.modal-role:hover {
     min-height: 350px;
   }
 }
+/* DRIVER REGISTRATION */
+
+.driver-auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  box-sizing: border-box;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(9, 40, 73, 0.94),
+      rgba(22, 70, 112, 0.82)
+    ),
+    url("/easyride-van.jpg") center / cover no-repeat;
+}
+
+.driver-auth-page,
+.driver-auth-page * {
+  box-sizing: border-box;
+}
+
+.driver-auth-page .driver-auth-card {
+  width: 100%;
+  max-width: 650px;
+  padding: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-top: 5px solid #f5a623;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.25);
+}
+
+.driver-auth-page .auth-back {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 9px 14px;
+  border: 1px solid #dce5ef;
+  border-radius: 9px;
+  background: #f3f6fa;
+  color: #123c66;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.driver-auth-page .auth-back:hover {
+  background: #e6eef7;
+}
+
+.driver-auth-page .auth-header {
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.driver-auth-page .auth-header h1 {
+  margin: 0 0 8px;
+  color: #092849;
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.driver-auth-page .auth-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.driver-auth-page form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.driver-auth-page form h2 {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5ebf2;
+  color: #092849;
+  font-size: 1.35rem;
+}
+
+.driver-auth-page .auth-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.driver-auth-page .auth-field label {
+  color: #244563;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.driver-auth-page .auth-field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #cbd7e4;
+  border-radius: 10px;
+  outline: none;
+  background: #f8fafc;
+  color: #092849;
+  font: inherit;
+  font-size: 1rem;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.driver-auth-page .auth-field input:focus {
+  border-color: #245b8d;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(36, 91, 141, 0.14);
+}
+
+.driver-auth-page .auth-submit {
+  grid-column: 1 / -1;
+  min-height: 50px;
+  margin-top: 8px;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 11px;
+  background: #f5a623;
+  color: #092849;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.driver-auth-page .auth-submit:hover:not(:disabled) {
+  background: #ffb83e;
+  transform: translateY(-1px);
+}
+
+.driver-auth-page button:focus-visible {
+  outline: 3px solid #245b8d;
+  outline-offset: 3px;
+}
+
+.driver-auth-page button:disabled,
+.driver-auth-page input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.driver-auth-page .auth-error,
+.driver-auth-page .auth-success {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.driver-auth-page .auth-error {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+}
+
+.driver-auth-page .auth-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+@media (max-width: 540px) {
+  .driver-auth-page {
+    align-items: flex-start;
+    padding: 24px 14px;
+  }
+
+  .driver-auth-page .driver-auth-card {
+    padding: 24px 20px;
+    border-radius: 18px;
+  }
+
+  .driver-auth-page form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+/* GLASS DRIVER REGISTRATION */
+
+.driver-auth-page {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(9, 40, 73, 0.65),
+      rgba(22, 70, 112, 0.35)
+    ),
+    url("/easyride-van.jpg") center / cover no-repeat;
+}
+
+.driver-auth-page .driver-auth-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-top: 4px solid #f5a623;
+  box-shadow:
+    0 24px 70px rgba(0, 20, 45, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.driver-auth-page .auth-field input {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(85, 115, 145, 0.4);
+}
+
+.driver-auth-page .auth-field input:focus {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.driver-auth-page .auth-back {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(85, 115, 145, 0.3);
+}
+
+.driver-auth-page .auth-header p {
+  color: #3c536b;
+}
+.driver-profile-details {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid #dce5ef;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.driver-profile-details dt {
+  margin-top: 16px;
+  color: #455e75;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.driver-profile-details dt:first-child {
+  margin-top: 0;
+}
+
+.driver-profile-details dd {
+  margin: 6px 0 0;
+  color: #092849;
+  overflow-wrap: anywhere;
+}
+
+.driver-auth-page .driver-register-link {
+  display: block;
+  margin: 20px auto 0;
+}

@@ -1,6 +1,7 @@
 ﻿const AccessModal = ({
   accessOpen,
   setAccessOpen,
+  openDriver,
   openDispatcher,
 }) => {
   const closeModal = () => {
@@ -45,7 +46,6 @@
         </div>
 
         <div className="access-cards modal-access-cards">
-          {/* PASSENGER */}
           <article className="access-card disabled-access-card">
             <img
               className="access-card-image"
@@ -63,8 +63,7 @@
               <h3>Passenger</h3>
 
               <p>
-                View van availability, available seats,
-                and travel information.
+                View seat information and vehicle availability.
               </p>
 
               <button
@@ -77,8 +76,7 @@
             </div>
           </article>
 
-          {/* DRIVER */}
-          <article className="access-card disabled-access-card">
+          <article className="access-card">
             <img
               className="access-card-image"
               src="/images/driver.png"
@@ -95,21 +93,19 @@
               <h3>Driver</h3>
 
               <p>
-                Log in or create your driver account
-                to access your dashboard.
+                Log in or register your driver and vehicle details.
               </p>
 
               <button
                 type="button"
                 className="card-link"
-                disabled
+                onClick={openDriver}
               >
                 Continue as Driver →
               </button>
             </div>
           </article>
 
-          {/* DISPATCHER */}
           <article className="access-card">
             <img
               className="access-card-image"
@@ -127,7 +123,7 @@
               <h3>Dispatcher</h3>
 
               <p>
-                Access the dispatcher login interface.
+                Log in to access your dispatcher account.
               </p>
 
               <button
@@ -142,8 +138,8 @@
         </div>
 
         <p className="modal-note">
-          Dispatcher login preview is available.
-          Authentication is pending implementation.
+          Driver and dispatcher account access is available.
+          Passenger access will be added separately.
         </p>
       </div>
     </div>

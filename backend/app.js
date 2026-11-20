@@ -1,6 +1,7 @@
 import express from "express";
 import session from "express-session";
 import dispatcherRoutes from "./routes/dispatcherRoutes.js";
+import driverRoutes from "./routes/driverRoutes.js";
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -9,7 +10,7 @@ const sessionSecret = process.env.SESSION_SECRET;
 if (
   !sessionSecret ||
   sessionSecret.length < 32 ||
-  sessionSecret.includes("REPLACE_WITH")
+  /replace[-_]with|ilagay_dito/i.test(sessionSecret)
 ) {
   throw new Error(
     "Set a generated SESSION_SECRET in backend/.env."
@@ -34,6 +35,12 @@ app.use(
   })
 );
 
+app.use(["/driver", "/dispatcher"], (req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
+app.use("/driver", driverRoutes);
 app.use("/dispatcher", dispatcherRoutes);
 
 app.use((error, req, res, next) => {
@@ -45,7 +52,7 @@ app.use((error, req, res, next) => {
     error.statusCode || error.status || 500;
 
   if (statusCode >= 500) {
-    console.error("Dispatcher backend error:", error);
+    console.error("EasyRide backend error:", error);
   }
 
   return res.status(statusCode).json({
@@ -57,8 +64,9 @@ app.use((error, req, res, next) => {
 });
 
 const server = app.listen(port, "127.0.0.1", () => {
-console.log("EASYRIDE Backend: http://127.0.0.1:" + port);
-    
+  console.log(
+    "EASYRIDE Backend: http://127.0.0.1:" + port
+  );
 });
 
 server.on("error", (error) => {
