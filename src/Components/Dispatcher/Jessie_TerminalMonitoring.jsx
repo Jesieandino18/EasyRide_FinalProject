@@ -27,6 +27,9 @@ const readResponse = async (response) => {
 };
 
 const Jessie_TerminalMonitoring = () => {
+  // Display threshold only; this does not confirm physical presence.
+  const freshLocationSeconds = 60;
+  const [now, setNow] = useState(Date.now());
   const [arrivals, setArrivals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -169,6 +172,11 @@ const Jessie_TerminalMonitoring = () => {
     }
   };
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const busy = loading || reviewingId !== null;
 
   return (
@@ -210,9 +218,10 @@ const Jessie_TerminalMonitoring = () => {
       )}
 
       <p className="dispatcher-monitoring-note">
-        These coordinates are the location saved at submission,
-        not live GPS. Confirm only after checking that the
-        driver and vehicle are physically at the terminal.
+        Submitted coordinates are saved with the request. Latest GPS
+        shows the last location retrieved using Refresh Arrivals.
+        GPS is marked stale after 60 seconds. Confirm only after
+        checking the driver and vehicle physically at the terminal.
       </p>
 
       {error && (
@@ -237,6 +246,29 @@ const Jessie_TerminalMonitoring = () => {
 
       <div className="dispatcher-arrival-grid">
         {arrivals.map((arrival) => {
+          const latest = arrival.latest_location;
+          const recordedAt = latest ? Date.parse(latest.recorded_at) : NaN;
+          const ageSeconds = (now - recordedAt) / 1000;
+          const validTime = Number.isFinite(ageSeconds) && ageSeconds >= 0;
+          const presence = arrival.terminal_presence;
+          const ageLimit = presence?.max_location_age_seconds ?? freshLocationSeconds;
+          const presenceExpired = latest && (!validTime || ageSeconds > ageLimit);
+          const presenceStatus = presenceExpired ? "unavailable" : presence?.status;
+          const presenceLabel = presenceStatus === "inside"
+            ? "Inside terminal boundary"
+            : presenceStatus === "outside"
+              ? "Outside terminal boundary"
+              : "Cannot determine terminal presence";
+          const presenceReason = presenceExpired
+            ? "Saved GPS reading is stale or its timestamp is invalid. Refresh to retrieve the latest reading."
+            : presence?.reason || "Terminal presence information is unavailable.";
+          const locationStatus = !latest
+            ? "No saved GPS"
+            : !validTime
+              ? "GPS time unavailable"
+              : ageSeconds <= freshLocationSeconds
+                ? "Recent saved GPS"
+                : "Stale saved GPS";
           const review = reviews[arrival.request_id] || {};
           const processing =
             reviewingId === arrival.request_id;
@@ -310,6 +342,25 @@ const Jessie_TerminalMonitoring = () => {
                   <dd>{formatTime(arrival.confirmed_at)}</dd>
                 </div>
               </dl>
+
+              <section aria-label="Latest saved GPS">
+                <h4>Latest Saved GPS</h4>
+                <p><strong>GPS-based terminal presence: {presenceLabel}</strong></p>
+                <p className="dispatcher-monitoring-note">{presenceReason}</p>
+                <p className="dispatcher-monitoring-note">
+                  GPS presence is separate from the reviewed arrival status.
+                </p>
+                <p className="dispatcher-monitoring-note">{locationStatus}</p>
+                {latest && (
+                  <dl className="dispatcher-arrival-details">
+                    <div><dt>Latitude</dt><dd>{latest.latitude}</dd></div>
+                    <div><dt>Longitude</dt><dd>{latest.longitude}</dd></div>
+                    <div><dt>Reported Accuracy</dt><dd>{latest.accuracy_meters} meters</dd></div>
+                    <div><dt>Last GPS Update</dt><dd>{formatTime(latest.recorded_at)}</dd></div>
+                    <div><dt>Age of Saved GPS</dt><dd>{validTime ? `${Math.floor(ageSeconds)} seconds` : "Unavailable"}</dd></div>
+                  </dl>
+                )}
+              </section>
 
               {arrival.status === "pending" && (
                 <div className="dispatcher-review-form">
