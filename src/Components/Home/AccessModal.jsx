@@ -1,14 +1,13 @@
-﻿
-const AccessModal = ({
+﻿const AccessModal = ({
   accessOpen,
   setAccessOpen,
-
+  openDriver,
 }) => {
-  if (!accessOpen) return null;
-
   const closeModal = () => {
     setAccessOpen(false);
   };
+
+  if (!accessOpen) return null;
 
   return (
     <div
@@ -46,7 +45,6 @@ const AccessModal = ({
         </div>
 
         <div className="access-cards modal-access-cards">
-          {/* PASSENGER */}
           <article className="access-card disabled-access-card">
             <img
               className="access-card-image"
@@ -64,18 +62,20 @@ const AccessModal = ({
               <h3>Passenger</h3>
 
               <p>
-                View van availability, available seats,
-                and travel information.
+                View seat information and vehicle availability.
               </p>
 
-              <span className="card-link disabled-card-link">
+              <button
+                type="button"
+                className="card-link"
+                disabled
+              >
                 Continue as Passenger →
-              </span>
+              </button>
             </div>
           </article>
 
-          {/* DRIVER */}
-          <article className="access-card disabled-access-card">
+          <article className="access-card">
             <img
               className="access-card-image"
               src="/images/driver.png"
@@ -92,21 +92,19 @@ const AccessModal = ({
               <h3>Driver</h3>
 
               <p>
-                Log in or create your driver account
-                to access your dashboard.
+                Register your driver and vehicle details.
               </p>
 
               <button
                 type="button"
                 className="card-link"
-                disabled
+                onClick={openDriver}
               >
                 Continue as Driver →
               </button>
             </div>
           </article>
 
-          {/* DISPATCHER */}
           <article className="access-card disabled-access-card">
             <img
               className="access-card-image"
@@ -124,19 +122,23 @@ const AccessModal = ({
               <h3>Dispatcher</h3>
 
               <p>
-                Manage vehicle information and
-                terminal operations.
+                Manage seat assignments and terminal operations.
               </p>
 
-              <span className="card-link disabled-card-link">
+              <button
+                type="button"
+                className="card-link"
+                disabled
+              >
                 Continue as Dispatcher →
-              </span>
+              </button>
             </div>
           </article>
         </div>
 
         <p className="modal-note">
-          Role access will be available in a future update.
+          Driver registration is available.
+          Other role features will be added separately.
         </p>
       </div>
     </div>
@@ -144,4 +146,3 @@ const AccessModal = ({
 };
 
 export default AccessModal;
-

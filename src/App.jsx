@@ -11,12 +11,15 @@ import PassengerPreview from "./Components/Home/PassengerPreview";
 import Contact from "./Components/Home/Contact";
 import Footer from "./Components/Home/Footer";
 import AccessModal from "./Components/Home/AccessModal";
+import Mark_DriverAuth from "./Components/Driver/Mark_DriverAuth";
 
 const App = () => {
+  const [currentPage, setCurrentPage] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
 
   const goHome = () => {
+    setCurrentPage("home");
     setMenuOpen(false);
     setAccessOpen(false);
 
@@ -26,7 +29,15 @@ const App = () => {
     });
   };
 
+  const openDriver = () => {
+    setCurrentPage("driverRegistration");
+    setMenuOpen(false);
+    setAccessOpen(false);
+    window.scrollTo(0, 0);
+  };
+
   const goToSection = (section) => {
+    setCurrentPage("home");
     setMenuOpen(false);
     setAccessOpen(false);
 
@@ -50,6 +61,10 @@ const App = () => {
     }, 100);
   };
 
+  if (currentPage === "driverRegistration") {
+    return <Mark_DriverAuth onBack={goHome} />;
+  }
+
   return (
     <div className="easyride-app">
       <Navbar
@@ -62,6 +77,7 @@ const App = () => {
       <AccessModal
         accessOpen={accessOpen}
         setAccessOpen={setAccessOpen}
+        openDriver={openDriver}
       />
 
       <Hero setAccessOpen={setAccessOpen} />
