@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import "./style.css";
 
+import Jessie_DispatcherAuth from "./Components/Dispatcher/Jessie_DispatcherAuth";
+import Mark_DriverPortal from "./Components/Driver/Mark_DriverPortal";
+
 import Navbar from "./Components/Home/Navbar";
 import Hero from "./Components/Home/Hero";
 import QuickInfo from "./Components/Home/QuickInfo";
@@ -11,12 +14,17 @@ import PassengerPreview from "./Components/Home/PassengerPreview";
 import Contact from "./Components/Home/Contact";
 import Footer from "./Components/Home/Footer";
 import AccessModal from "./Components/Home/AccessModal";
-import Mark_DriverPortal from "./Components/Driver/Mark_DriverPortal";
 
 const getCurrentPage = () => {
-  return window.location.hash === "#driver"
-    ? "driverRegistration"
-    : "home";
+  if (window.location.hash === "#driver") {
+    return "driver";
+  }
+
+  if (window.location.hash === "#dispatcher") {
+    return "dispatcher";
+  }
+
+  return "home";
 };
 
 const App = () => {
@@ -38,7 +46,15 @@ const App = () => {
 
   const openDriver = () => {
     window.location.hash = "driver";
-    setCurrentPage("driverRegistration");
+    setCurrentPage("driver");
+    setMenuOpen(false);
+    setAccessOpen(false);
+    window.scrollTo(0, 0);
+  };
+
+  const openDispatcher = () => {
+    window.location.hash = "dispatcher";
+    setCurrentPage("dispatcher");
     setMenuOpen(false);
     setAccessOpen(false);
     window.scrollTo(0, 0);
@@ -87,8 +103,12 @@ const App = () => {
     };
   }, []);
 
-  if (currentPage === "driverRegistration") {
+  if (currentPage === "driver") {
     return <Mark_DriverPortal onBack={goHome} />;
+  }
+
+  if (currentPage === "dispatcher") {
+    return <Jessie_DispatcherAuth onBack={goHome} />;
   }
 
   return (
@@ -104,6 +124,7 @@ const App = () => {
         accessOpen={accessOpen}
         setAccessOpen={setAccessOpen}
         openDriver={openDriver}
+        openDispatcher={openDispatcher}
       />
 
       <Hero setAccessOpen={setAccessOpen} />

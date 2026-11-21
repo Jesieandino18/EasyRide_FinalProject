@@ -2,6 +2,7 @@
   accessOpen,
   setAccessOpen,
   openDriver,
+  openDispatcher,
 }) => {
   const closeModal = () => {
     setAccessOpen(false);
@@ -92,7 +93,7 @@
               <h3>Driver</h3>
 
               <p>
-                Register your driver and vehicle details.
+                Log in or register your driver and vehicle details.
               </p>
 
               <button
@@ -105,7 +106,7 @@
             </div>
           </article>
 
-          <article className="access-card disabled-access-card">
+          <article className="access-card">
             <img
               className="access-card-image"
               src="/images/dispatcher.png"
@@ -122,13 +123,13 @@
               <h3>Dispatcher</h3>
 
               <p>
-                Manage seat assignments and terminal operations.
+                Log in to access your dispatcher account.
               </p>
 
               <button
                 type="button"
                 className="card-link"
-                disabled
+                onClick={openDispatcher}
               >
                 Continue as Dispatcher →
               </button>
@@ -137,8 +138,8 @@
         </div>
 
         <p className="modal-note">
-          Driver registration is available.
-          Other role features will be added separately.
+          Driver and dispatcher account access is available.
+          Passenger access will be added separately.
         </p>
       </div>
     </div>
