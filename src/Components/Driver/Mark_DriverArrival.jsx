@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Mark_DriverQueue from "./Mark_DriverQueue";
 
 const readArrivalResponse = async (response) => {
   const result = await response.json().catch(() => null);
@@ -29,17 +30,25 @@ const formatArrivalTime = (value) => {
 const getFreshLocation = (signal) => {
   return new Promise((resolve, reject) => {
     if (signal.aborted) {
-      reject(new DOMException("Request cancelled.", "AbortError"));
+      reject(
+        new DOMException("Request cancelled.", "AbortError")
+      );
       return;
     }
 
     if (!window.isSecureContext) {
-      reject(new Error("Location access requires HTTPS or localhost."));
+      reject(
+        new Error("Location access requires HTTPS or localhost.")
+      );
       return;
     }
 
     if (!navigator.geolocation) {
-      reject(new Error("This browser does not support location access."));
+      reject(
+        new Error(
+          "This browser does not support location access."
+        )
+      );
       return;
     }
 
@@ -51,8 +60,8 @@ const getFreshLocation = (signal) => {
 
     const finish = (location, requestError) => {
       if (finished) return;
-      finished = true;
 
+      finished = true;
       window.clearTimeout(timer);
 
       if (watchId !== undefined) {
@@ -90,14 +99,13 @@ const getFreshLocation = (signal) => {
         (position) => {
           if (finished) return;
 
-          const latitude = position.coords.latitude;
-          const longitude = position.coords.longitude;
-          const accuracy = position.coords.accuracy;
+          const { latitude, longitude, accuracy } =
+            position.coords;
 
           if (
             !Number.isFinite(latitude) ||
-            !Number.isFinite(longitude) ||
             Math.abs(latitude) > 90 ||
+            !Number.isFinite(longitude) ||
             Math.abs(longitude) > 180 ||
             !Number.isFinite(accuracy) ||
             accuracy < 0
@@ -105,7 +113,11 @@ const getFreshLocation = (signal) => {
             return;
           }
 
-          const reading = { latitude, longitude, accuracy };
+          const reading = {
+            latitude,
+            longitude,
+            accuracy,
+          };
 
           if (
             !bestLocation ||
@@ -114,7 +126,7 @@ const getFreshLocation = (signal) => {
             bestLocation = reading;
           }
 
-          // Current accuracy target. The backend remains authoritative.
+          // Current target only; the backend validates eligibility.
           if (accuracy <= 100) {
             finish(reading);
           }
@@ -134,7 +146,7 @@ const getFreshLocation = (signal) => {
 
           lastError =
             gpsError.code === 2
-              ? "Device location is unavailable. Check your device location settings and try again."
+              ? "Device location is unavailable. Check your location settings and try again."
               : "Location request timed out. Please try again.";
         },
         {
@@ -158,6 +170,7 @@ const Mark_DriverArrival = () => {
   const actionController = useRef(null);
 
   const [arrival, setArrival] = useState(null);
+  const [queueRefreshCount, setQueueRefreshCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [action, setAction] = useState("");
   const [message, setMessage] = useState("");
@@ -169,16 +182,20 @@ const Mark_DriverArrival = () => {
 
     const loadArrival = async () => {
       try {
-        const response = await fetch("/driver/arrival-request", {
-          credentials: "include",
-          cache: "no-store",
-          signal: controller.signal,
-        });
+        const response = await fetch(
+          "/driver/arrival-request",
+          {
+            credentials: "include",
+            cache: "no-store",
+            signal: controller.signal,
+          }
+        );
 
         const result = await readArrivalResponse(response);
 
         if (!controller.signal.aborted) {
           setArrival(result.arrival);
+          setQueueRefreshCount((count) => count + 1);
         }
       } catch (requestError) {
         if (!controller.signal.aborted) {
@@ -203,6 +220,7 @@ const Mark_DriverArrival = () => {
     if (loading || requestInProgress.current) return;
 
     requestInProgress.current = true;
+
     const controller = new AbortController();
     actionController.current = controller;
 
@@ -211,16 +229,20 @@ const Mark_DriverArrival = () => {
     setMessage("");
 
     try {
-      const response = await fetch("/driver/arrival-request", {
-        credentials: "include",
-        cache: "no-store",
-        signal: controller.signal,
-      });
+      const response = await fetch(
+        "/driver/arrival-request",
+        {
+          credentials: "include",
+          cache: "no-store",
+          signal: controller.signal,
+        }
+      );
 
       const result = await readArrivalResponse(response);
 
       if (!controller.signal.aborted) {
         setArrival(result.arrival);
+        setQueueRefreshCount((count) => count + 1);
       }
     } catch (requestError) {
       if (!controller.signal.aborted) {
@@ -238,7 +260,12 @@ const Mark_DriverArrival = () => {
   const handleRequest = async (requestType) => {
     if (loading || requestInProgress.current) return;
 
-    if (requestType === "submit" && arrival?.is_active) return;
+    if (
+      requestType === "submit" &&
+      arrival?.is_active
+    ) {
+      return;
+    }
 
     requestInProgress.current = true;
 
@@ -248,6 +275,7 @@ const Mark_DriverArrival = () => {
     setAction(requestType);
     setError("");
     setAccuracy(null);
+
     setMessage(
       "Getting a fresh location. Waiting up to 25 seconds for a more accurate reading..."
     );
@@ -255,21 +283,26 @@ const Mark_DriverArrival = () => {
     let submittingArrival = false;
 
     try {
-      const reading = await getFreshLocation(controller.signal);
+      const reading = await getFreshLocation(
+        controller.signal
+      );
 
       setAccuracy(reading.accuracy);
       setMessage("Saving your fresh location...");
 
-      const locationResponse = await fetch("/driver/location", {
-        method: "POST",
-        credentials: "include",
-        signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-          "X-EasyRide-Request": "1",
-        },
-        body: JSON.stringify(reading),
-      });
+      const locationResponse = await fetch(
+        "/driver/location",
+        {
+          method: "POST",
+          credentials: "include",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            "X-EasyRide-Request": "1",
+          },
+          body: JSON.stringify(reading),
+        }
+      );
 
       await readArrivalResponse(locationResponse);
 
@@ -279,32 +312,33 @@ const Mark_DriverArrival = () => {
           : "Checking your location against the terminal requirements..."
       );
 
-      const endpoint =
-        requestType === "submit"
-          ? "/driver/arrival-request"
-          : "/driver/arrival-check";
-
       submittingArrival = requestType === "submit";
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        credentials: "include",
-        signal: controller.signal,
-        headers: {
-          "X-EasyRide-Request": "1",
-        },
-      });
+      const response = await fetch(
+        submittingArrival
+          ? "/driver/arrival-request"
+          : "/driver/arrival-check",
+        {
+          method: "POST",
+          credentials: "include",
+          signal: controller.signal,
+          headers: {
+            "X-EasyRide-Request": "1",
+          },
+        }
+      );
 
       const result = await readArrivalResponse(response);
 
       if (!controller.signal.aborted) {
-        if (requestType === "submit") {
+        if (submittingArrival) {
           setArrival(result.arrival);
+          setQueueRefreshCount((count) => count + 1);
         }
 
         setMessage(
           result.message ||
-            (requestType === "submit"
+            (submittingArrival
               ? "Arrival request submitted. Please wait for dispatcher confirmation."
               : "Your location passed the terminal check.")
         );
@@ -333,12 +367,16 @@ const Mark_DriverArrival = () => {
   const busy = loading || action !== "";
 
   return (
-    <section className="driver-location-panel" aria-busy={busy}>
+    <section
+      className="driver-location-panel"
+      aria-busy={busy}
+    >
       <h2>Terminal Arrival Request</h2>
 
       <p>
-        Check or submit to get a fresh device location automatically.
-        Allow location access and keep this window open while checking.
+        Check or submit to get a fresh device location
+        automatically. Allow location access and keep
+        this window open while checking.
       </p>
 
       {loading && (
@@ -351,48 +389,54 @@ const Mark_DriverArrival = () => {
         </p>
       )}
 
-      {message && <p role="status">{message}</p>}
+      {message && (
+        <p role="status">{message}</p>
+      )}
 
       {accuracy !== null && (
         <p>
-          Device-reported accuracy: {Math.ceil(accuracy)} meters.
-          Saving a location does not confirm terminal arrival.
+          Device-reported accuracy: {Math.ceil(accuracy)}
+          {" "}meters. Saving a location does not confirm
+          terminal arrival.
         </p>
       )}
 
       {arrival ? (
-        <div>
-          <dl className="driver-profile-details">
-            <dt>Request Number</dt>
-            <dd>{arrival.id}</dd>
+        <dl className="driver-profile-details">
+          <dt>Request Number</dt>
+          <dd>{arrival.id}</dd>
 
-            <dt>Status</dt>
-            <dd>{arrival.status}</dd>
+          <dt>Status</dt>
+          <dd>{arrival.status}</dd>
 
-            <dt>Requested At</dt>
-            <dd>{formatArrivalTime(arrival.requested_at)}</dd>
+          <dt>Requested At</dt>
+          <dd>
+            {formatArrivalTime(arrival.requested_at)}
+          </dd>
 
-            <dt>Confirmed At</dt>
-            <dd>{formatArrivalTime(arrival.confirmed_at)}</dd>
-          </dl>
-
-          {arrival.status === "pending" && (
-            <p>
-              Waiting for dispatcher confirmation.
-              No queue number has been assigned yet.
-            </p>
-          )}
-        </div>
+          <dt>Confirmed At</dt>
+          <dd>
+            {formatArrivalTime(arrival.confirmed_at)}
+          </dd>
+        </dl>
       ) : (
         !loading && <p>No arrival request yet.</p>
       )}
+
+      <Mark_DriverQueue
+        arrivalId={arrival?.id ?? null}
+        arrivalStatus={arrival?.status ?? null}
+        refreshKey={queueRefreshCount}
+        onRefresh={refreshStatus}
+        busy={busy}
+      />
 
       <div className="driver-arrival-actions">
         <button
           type="button"
           className="auth-back"
-          onClick={() => handleRequest("check")}
           disabled={busy}
+          onClick={() => handleRequest("check")}
         >
           {action === "check"
             ? "Getting Location and Checking..."
@@ -402,8 +446,8 @@ const Mark_DriverArrival = () => {
         <button
           type="button"
           className="auth-submit"
-          onClick={() => handleRequest("submit")}
           disabled={busy || Boolean(arrival?.is_active)}
+          onClick={() => handleRequest("submit")}
         >
           {action === "submit"
             ? "Getting Location and Submitting..."
@@ -415,16 +459,16 @@ const Mark_DriverArrival = () => {
         <button
           type="button"
           className="auth-back"
-          onClick={refreshStatus}
           disabled={busy}
+          onClick={refreshStatus}
         >
           Refresh Status
         </button>
       </div>
 
       <p>
-        Submitting a request does not automatically confirm arrival
-        or assign a queue number.
+        Submitting a request does not automatically confirm
+        arrival or assign a queue number.
       </p>
     </section>
   );
