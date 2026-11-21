@@ -406,7 +406,139 @@ const runTest = async () => {
     "The Manila date stayed unchanged during the test."
   );
 
-  console.log("ALL DAILY-LIMIT TESTS PASSED.");
+  // Two new arrivals and three simultaneous allocation calls.
+  await addTestArrival(21, 20);
+  await addTestArrival(22, 21);
+
+  const concurrentAllocations = await Promise.all([
+    model.allocateConfirmedArrivals(1),
+    model.allocateConfirmedArrivals(1),
+    model.allocateConfirmedArrivals(1),
+  ]);
+
+  const newAllocations = concurrentAllocations.flatMap(
+    (batch) => batch.allocations
+  );
+
+  check(
+    newAllocations.length === 2 &&
+      new Set(
+        newAllocations.map((entry) => entry.request_id)
+      ).size === 2 &&
+      newAllocations.every(
+        (entry) => entry.travel_date === tomorrow
+      ),
+    "Concurrent allocation assigns each new request exactly once."
+  );
+
+  queue = await model.getQueue();
+
+  const newEntries = queue.entries.filter(
+    (entry) =>
+      Number(entry.request_id) === 21 ||
+      Number(entry.request_id) === 22
+  );
+
+  check(
+    newEntries.length === 2 &&
+      newEntries.find(
+        (entry) => Number(entry.request_id) === 21
+      )?.queue_number === 3 &&
+      newEntries.find(
+        (entry) => Number(entry.request_id) === 22
+      )?.queue_number === 4,
+    "Concurrent allocation preserves FIFO and unique queue numbers."
+  );
+
+  check(
+    queue.days.find(
+      (day) => day.travel_date === today
+    )?.allocated_count === 18 &&
+      queue.days.find(
+        (day) => day.travel_date === tomorrow
+      )?.allocated_count === 4,
+    "Concurrent allocation leaves daily counters correct: 18 today, 4 tomorrow."
+  );
+
+  const second = result.allocations[1];
+  const third = result.allocations[2];
+
+  try {
+    await model.changeTripStatus(third.id, 1, "depart");
+
+    throw new Error(
+      "An out-of-order departure was incorrectly accepted."
+    );
+  } catch (error) {
+    if (
+      error.statusCode !== 409 &&
+      error.status !== 409
+    ) {
+      throw error;
+    }
+
+    console.log(
+      "PASS: The model rejects out-of-order departure."
+    );
+  }
+
+  const departures = await Promise.allSettled([
+    model.changeTripStatus(second.id, 1, "depart"),
+    model.changeTripStatus(second.id, 1, "depart"),
+  ]);
+
+  const departureError = departures.find(
+    (outcome) => outcome.status === "rejected"
+  )?.reason;
+
+  check(
+    departures.filter(
+      (outcome) => outcome.status === "fulfilled"
+    ).length === 1 &&
+      (
+        departureError?.statusCode === 409 ||
+        departureError?.status === 409
+      ),
+    "Concurrent departure succeeds once and rejects the duplicate with 409."
+  );
+
+  const completions = await Promise.allSettled([
+    model.changeTripStatus(second.id, 1, "complete"),
+    model.changeTripStatus(second.id, 1, "complete"),
+  ]);
+
+  const completionError = completions.find(
+    (outcome) => outcome.status === "rejected"
+  )?.reason;
+
+  check(
+    completions.filter(
+      (outcome) => outcome.status === "fulfilled"
+    ).length === 1 &&
+      (
+        completionError?.statusCode === 409 ||
+        completionError?.status === 409
+      ),
+    "Concurrent completion succeeds once and rejects the duplicate with 409."
+  );
+
+  queue = await model.getQueue();
+
+  check(
+    queue.entries.find(
+      (entry) => entry.id === second.id
+    )?.status === "completed" &&
+      queue.next_departure_id === third.id &&
+      queue.days.find(
+        (day) => day.travel_date === today
+      )?.allocated_count === 18 &&
+      queue.today === today,
+    "Final trip status, next departure, daily count, and Manila date remain correct."
+  );
+
+  console.log(
+    "ALL DAILY-LIMIT AND CONCURRENCY TESTS PASSED."
+  );
 
   console.log(
     "These are database/model tests, not Postman or browser tests."
