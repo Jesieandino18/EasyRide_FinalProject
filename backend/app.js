@@ -1,5 +1,6 @@
 import express from "express";
 import session from "express-session";
+import dispatcherRoutes from "./routes/dispatcherRoutes.js";
 import driverRoutes from "./routes/driverRoutes.js";
 
 const app = express();
@@ -9,8 +10,7 @@ const sessionSecret = process.env.SESSION_SECRET;
 if (
   !sessionSecret ||
   sessionSecret.length < 32 ||
-  sessionSecret.includes("ILAGAY_DITO") ||
-  sessionSecret.includes("replace-with")
+  /replace[-_]with|ilagay_dito/i.test(sessionSecret)
 ) {
   throw new Error(
     "Set a generated SESSION_SECRET in backend/.env."
@@ -35,12 +35,13 @@ app.use(
   })
 );
 
-app.use("/driver", (req, res, next) => {
+app.use(["/driver", "/dispatcher"], (req, res, next) => {
   res.set("Cache-Control", "no-store");
   next();
 });
 
 app.use("/driver", driverRoutes);
+app.use("/dispatcher", dispatcherRoutes);
 
 app.use((error, req, res, next) => {
   if (res.headersSent) {
@@ -51,7 +52,7 @@ app.use((error, req, res, next) => {
     error.statusCode || error.status || 500;
 
   if (statusCode >= 500) {
-    console.error("Driver backend error:", error);
+    console.error("EasyRide backend error:", error);
   }
 
   return res.status(statusCode).json({
